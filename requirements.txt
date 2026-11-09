@@ -1,0 +1,10 @@
+langchain-core
+langchain-community
+langchain-anthropic
+langchain-huggingface
+langchain-text-splitters
+sentence-transformers
+pypdf
+docx2txt
+faster-whisper
+opencv-python-headless

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen – Ask your files</title>
+<style>
+:root{--bg:#faf9f7;--side:#f3f2ee;--panel:#fff;--ink:#1d1d1b;--mute:#8a8a85;--line:#e7e5df;--hover:#ebe9e3;--accent:#1d1d1b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#141412;--side:#1a1a18;--panel:#1e1e1c;--ink:#ecebe6;--mute:#8d8c86;--line:#2d2c29;--hover:#262522;--accent:#ecebe6}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#141412;--side:#1a1a18;--panel:#1e1e1c;--ink:#ecebe6;--mute:#8d8c86;--line:#2d2c29;--hover:#262522;--accent:#ecebe6}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ib{border:0;background:none;border-radius:8px;width:34px;height:34px;display:grid;place-items:center;color:var(--mute);position:relative}
+.ib:hover{background:var(--hover);color:var(--ink)}
+[data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 6px);left:0;background:#111;color:#fff;font-size:12px;padding:5px 10px;border-radius:8px;white-space:nowrap;z-index:20;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+/* sidebar */
+aside{width:264px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:12px;gap:8px;transition:margin-left .25s,transform .25s;flex:none}
+body.closed aside{margin-left:-264px}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 6px}
+.name{font:600 19px Georgia,"Times New Roman",serif;letter-spacing:-.3px}
+.nav{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border:1px solid var(--line);background:var(--panel);border-radius:10px;text-align:left}
+.nav:hover{background:var(--hover)}
+.srch{display:flex;align-items:center;gap:8px;padding:6px 10px;color:var(--mute)}
+.srch input{border:0;background:none;outline:none;color:var(--ink);font:inherit;width:100%}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);padding:6px 10px 2px}
+.fl{flex:1;overflow:auto;display:flex;flex-direction:column;gap:2px}
+.f{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px}
+.f:hover{background:var(--hover)}
+.f .t{flex:1;min-width:0}.f .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.f .s{font-size:11.5px;color:var(--mute)}
+.f .s.err{color:#d6453d}
+.f .x{opacity:0;border:0;background:none;color:var(--mute);width:24px;height:24px}.f:hover .x{opacity:1}
+.none{color:var(--mute);padding:8px 10px;font-size:13px}
+/* main */
+main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.top{display:flex;align-items:center;gap:4px;padding:10px 12px;min-height:54px}
+.top .sp{flex:1}.top #open{display:none}body.closed .top #open{display:grid}
+#banner{font-size:12.5px;color:var(--mute);border:1px solid var(--line);background:var(--panel);padding:6px 12px;border-radius:10px}
+.stage{flex:1;display:flex;flex-direction:column;min-height:0;width:100%;max-width:800px;margin:0 auto;padding:0 20px 16px}
+.hero,.cards{display:none}
+.empty .hero{display:block}.empty .cards{display:grid}
+.empty .stage{justify-content:center}
+.hero{text-align:center;font:400 38px Georgia,"Times New Roman",serif;letter-spacing:-.5px;margin:0 0 26px}
+.hero i{font-style:italic}
+.msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:6px 0 16px}
+.empty .msgs{display:none;flex:0}
+.m{max-width:88%;padding:11px 14px;border-radius:14px;white-space:pre-wrap;word-wrap:break-word}
+.m.u{align-self:flex-end;background:var(--accent);color:var(--bg)}
+.m.a{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
+.src{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;white-space:normal}
+.src span{font-size:11.5px;border:1px solid var(--line);border-radius:8px;padding:2px 8px;color:var(--mute)}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.box:focus-within{border-color:var(--mute)}
+.row{display:flex;gap:10px;align-items:flex-start}
+.row svg{margin-top:3px;color:var(--mute)}
+textarea{flex:1;border:0;outline:none;resize:none;background:none;color:var(--ink);font:inherit;font-size:15px;min-height:52px;max-height:200px}
+.bar{display:flex;align-items:center;gap:6px;margin-top:6px}
+.bar .sp{flex:1}
+.pill{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:4px 12px 4px 8px;height:34px}
+.pill:hover{background:var(--hover)}
+.send{background:var(--accent);color:var(--bg);border:0;border-radius:10px;width:36px;height:36px;display:grid;place-items:center}
+.send:hover{opacity:.85}
+.cards{grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.card{display:flex;gap:10px;align-items:center;text-align:left;padding:10px;border:1px solid var(--line);background:var(--panel);border-radius:12px}
+.card:hover{background:var(--hover)}
+.card .ci{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;color:var(--mute);flex:none}
+.card b{display:block;font-weight:500;font-size:13px}.card small{color:var(--mute);font-size:11.5px;display:block;line-height:1.3}
+.drag::after{content:"Drop files to add them";position:fixed;inset:12px;border:2px dashed var(--mute);border-radius:20px;background:color-mix(in srgb,var(--bg) 85%,transparent);display:grid;place-items:center;font:22px Georgia,serif;z-index:50}
+@media(max-width:800px){
+ aside{position:fixed;inset:0 auto 0 0;z-index:30;box-shadow:6px 0 24px rgba(0,0,0,.12);padding-top:calc(12px + env(safe-area-inset-top,0px))}
+ body.closed aside{margin-left:0;transform:translateX(-110%)}
+ .cards{grid-template-columns:1fr 1fr}.hero{font-size:30px}}
+</style>
+</head>
+<body>
+<aside>
+ <div class="sh"><span class="name">Lumen</span><button class="ib" id="close" data-tip="Close sidebar" aria-label="Close sidebar"></button></div>
+ <button class="nav" id="new"></button>
+ <label class="srch"><span id="si"></span><input id="find" placeholder="Search files"></label>
+ <div class="lbl">Your files</div>
+ <div class="fl" id="fl"></div>
+ <button class="nav" id="add"></button>
+</aside>
+<main id="main" class="empty">
+ <div class="top">
+  <button class="ib" id="open" data-tip="Open sidebar" aria-label="Open sidebar"></button>
+  <div class="sp"></div>
+  <div id="banner" hidden>Demo mode: backend not connected</div>
+  <button class="ib" id="theme" aria-label="Toggle theme"></button>
+ </div>
+ <div class="stage">
+  <div class="msgs" id="msgs"></div>
+  <h1 class="hero">Ask anything from your <i>files</i></h1>
+  <div class="box">
+   <div class="row"><span id="mi"></span><textarea id="q" rows="2" placeholder="Ask anything"></textarea></div>
+   <div class="bar">
+    <button class="pill" id="attach"></button>
+    <span style="font-size:12px;color:var(--mute)">PDF · Word · Images · Video · Audio · Text</span>
+    <div class="sp"></div>
+    <button class="send" id="send" aria-label="Send"></button>
+   </div>
+  </div>
+  <div class="cards" id="cards"></div>
+ </div>
+</main>
+<input type="file" id="inp" multiple hidden accept=".pdf,.docx,.txt,.md,.csv,.png,.jpg,.jpeg,.webp,.mp4,.mov,.webm,.avi,.mpeg,.mpg,.wmv,.mp3,.wav,.aac,.flac,.ogg">
+<script>
+const $=id=>document.getElementById(id);
+// Paste your Render backend URL here (no trailing slash). For local testing use 'http://localhost:8000'.
+const BACKEND_URL='https://your-backend.onrender.com';
+const API=(location.hostname==='localhost'||location.hostname==='127.0.0.1')&&location.port==='8000'?'':BACKEND_URL;
+let online=false,files=[],chatLog=[];
+const MAX_MB=100; // keep in sync with MAX_FILE_MB on the backend
+const I={
+ side:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>',
+ plus:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+ search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+ clip:'<svg viewBox="0 0 24 24"><path d="m21 11-8.6 8.6a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.6 8.6a2 2 0 0 1-3-3L15 7"/></svg>',
+ send:'<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
+ spark:'<svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg>',
+ trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+ moon:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>',
+ doc:'<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/></svg>',
+ img:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="m21 16-5-5-9 9"/></svg>',
+ vid:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>',
+ list:'<svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+ cmp:'<svg viewBox="0 0 24 24"><path d="M8 3H4v18h4M16 3h4v18h-4M12 4v16"/></svg>',
+ cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'};
+const put=(id,k,t)=>{$(id).innerHTML=I[k]+(t?'<span>'+t+'</span>':'')};
+put('close','side');put('open','side');put('new','plus','New chat');put('si','search');put('add','clip','Add files');
+put('mi','spark');put('attach','clip','Add files');put('send','send');put('theme','moon');
+const CARDS=[['doc','Summarize a document','Get the key points of a PDF or Word file','Summarize the main points of my documents'],
+ ['img','Read an image','Extract the text and describe a picture','What text and objects appear in my images?'],
+ ['vid','Ask about a video','Search the transcript and key moments','What is discussed in the video, with timestamps?'],
+ ['list','Find action items','Tasks, owners and deadlines','List all action items and who owns them'],
+ ['cmp','Compare files','See differences across documents','Compare my documents and highlight the differences'],
+ ['cal','Extract key dates','Deadlines, events and numbers','List every important date and number you can find']];
+CARDS.forEach(c=>{const b=document.createElement('button');b.className='card';
+ b.innerHTML='<span class="ci">'+I[c[0]]+'</span><span><b></b><small></small></span>';
+ b.querySelector('b').textContent=c[1];b.querySelector('small').textContent=c[2];
+ b.onclick=()=>{$('q').value=c[3];$('q').focus()};$('cards').append(b)});
+
+// sidebar toggle
+function toggle(){document.body.classList.toggle('closed')}
+$('close').onclick=toggle;$('open').onclick=toggle;
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='b'){e.preventDefault();toggle()}});
+if(innerWidth<800)document.body.classList.add('closed');
+$('theme').onclick=()=>{const r=document.documentElement;r.dataset.theme=getComputedStyle(r).colorScheme.includes('dark')?'light':'dark'};
+
+// files
+function drawFiles(){const box=$('fl'),k=$('find').value.toLowerCase();box.replaceChildren();
+ const list=files.filter(f=>f.name.toLowerCase().includes(k));
+ if(!list.length){const d=document.createElement('div');d.className='none';d.textContent=files.length?'No match':'No files yet';box.append(d)}
+ list.forEach(f=>{const r=document.createElement('div');r.className='f';
+  r.innerHTML='<span class="t"><div class="n"></div><div class="s"></div></span><button class="x" title="Remove"></button>';
+  r.querySelector('.n').textContent=f.name;
+  const s=r.querySelector('.s');s.textContent=f.status=='ready'?'Ready':f.status=='error'?(f.msg||'Failed'):'Processing…';if(f.status=='error')s.classList.add('err');
+  const x=r.querySelector('.x');x.innerHTML=I.trash;x.onclick=()=>removeFile(f);box.append(r)})}
+$('find').oninput=drawFiles;
+async function removeFile(f){files=files.filter(x=>x!==f);drawFiles();
+ if(online&&f.status=='ready'){try{await fetch(API+'/files/'+encodeURIComponent(f.name),{method:'DELETE'})}catch(e){}}}
+async function upload(file){const f={name:file.name,status:'working'};files.unshift(f);
+ if(file.size>MAX_MB*1024*1024){f.status='error';f.msg='Too large (max '+MAX_MB+' MB)';drawFiles();return}
+ drawFiles();
+ if(!online){setTimeout(()=>{f.status='ready';drawFiles()},1200);return}
+ const form=new FormData();form.append('file',file);
+ try{const r=await fetch(API+'/upload',{method:'POST',body:form});const d=await r.json();
+  if(d.ok)f.status='ready';else{f.status='error';f.msg=d.error}}catch(e){f.status='error';f.msg='Upload failed'}
+ drawFiles()}
+const addFiles=list=>[...list].forEach(upload);
+$('add').onclick=$('attach').onclick=()=>$('inp').click();
+$('inp').onchange=e=>{addFiles(e.target.files);e.target.value=''};
+let depth=0;
+addEventListener('dragenter',e=>{e.preventDefault();depth++;document.body.classList.add('drag')});
+addEventListener('dragover',e=>e.preventDefault());
+addEventListener('dragleave',()=>{if(--depth<=0){depth=0;document.body.classList.remove('drag')}});
+addEventListener('drop',e=>{e.preventDefault();depth=0;document.body.classList.remove('drag');addFiles(e.dataTransfer.files)});
+
+// chat
+function bubble(cls,text){const m=document.createElement('div');m.className='m '+cls;m.textContent=text;$('msgs').append(m);$('msgs').scrollTop=1e9;return m}
+async function ask(){const q=$('q').value.trim();if(!q)return;
+ $('main').classList.remove('empty');$('q').value='';bubble('u',q);const a=bubble('a','Thinking…');
+ if(!online){a.textContent='Demo mode: the backend isn’t connected, so this is a placeholder. Start the Python server (uvicorn main:app) and open http://localhost:8000 to get real answers from your files.';return}
+ try{const r=await fetch(API+'/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,history:chatLog.slice(-6)})});
+  const d=await r.json();a.textContent=d.answer;chatLog.push({role:'user',text:q},{role:'assistant',text:d.answer});
+  const seen=new Set(),sr=document.createElement('div');sr.className='src';
+  (d.sources||[]).forEach(s=>{const t=s.file+' · '+s.where;if(seen.has(t))return;seen.add(t);const p=document.createElement('span');p.textContent=t;sr.append(p)});
+  if(seen.size)a.append(sr)}catch(e){a.textContent='Could not reach the backend. Is the server running?'}
+ $('msgs').scrollTop=1e9}
+$('send').onclick=ask;
+$('q').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask()}};
+$('new').onclick=()=>{chatLog=[];$('msgs').replaceChildren();$('main').classList.add('empty');$('q').focus()};
+
+async function connect(){try{const r=await fetch(API+'/files');const d=await r.json();files=d.files.map(n=>({name:n,status:'ready'}));online=true}catch(e){online=false}
+ $('banner').hidden=online;drawFiles()}
+connect();
+</script>
+</body>
+</html>
